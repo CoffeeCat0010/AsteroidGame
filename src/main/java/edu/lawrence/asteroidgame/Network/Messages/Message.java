@@ -3,16 +3,18 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.lawrence.asteroidgame.Network;
+package edu.lawrence.asteroidgame.Network.Messages;
+
+import edu.lawrence.asteroidgame.Network.NetworkConsts;
 
 /**
  *
  * @author Justin
  */
-public class Message {
+public class Message implements NetworkConsts{
     private final int messageType;
     
-    private Message(int messageType){
+    protected Message(int messageType){
         this.messageType = messageType;
     }
 

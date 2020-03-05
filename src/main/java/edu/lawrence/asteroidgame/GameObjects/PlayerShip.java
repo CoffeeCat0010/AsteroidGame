@@ -12,16 +12,12 @@ import javafx.scene.shape.Polygon;
  * @author Justin
  */
 public class PlayerShip {
-    private static final double[] VERTICES = { 0.0,  0.0, 
-                                              10.0,  0.0,
-                                               5.0, 15.0};
     private Polygon ship;
     
     private double x, y;
     
     public PlayerShip(double x, double y){
-        //ship = new Polygon(VERTICES);
-        ship = new Polygon(x-5,y,x+5,y,x,y-5);
+        ship = new Polygon(x-10,y,x+10,y,x,y-30);
         ship.setFill(Color.BLUE);
     }
     public void update(double x, double y){

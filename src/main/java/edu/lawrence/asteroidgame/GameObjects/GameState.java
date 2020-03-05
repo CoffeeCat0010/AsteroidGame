@@ -15,6 +15,7 @@ public class GameState implements GameConsts{
     private List<Shape> shapes;
     
     public GameState() {
+        shapes = new ArrayList<Shape>();
         asteroids = new ArrayList<Asteroid>();
         ship = new PlayerShip(WIDTH/2,HEIGHT);
         shapes.add(ship.getShip());

@@ -5,6 +5,7 @@
  */
 package edu.lawrence.asteroidgame.GameObjects;
 
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Polygon;
 /**
  *
@@ -19,8 +20,9 @@ public class PlayerShip {
     private double x, y;
     
     public PlayerShip(double x, double y){
-        ship = new Polygon(VERTICES);
-        
+        //ship = new Polygon(VERTICES);
+        ship = new Polygon(x-5,y,x+5,y,x,y-5);
+        ship.setFill(Color.BLUE);
     }
     public void update(double x, double y){
         this.x = x;
@@ -30,5 +32,9 @@ public class PlayerShip {
     public void draw(){
         ship.setTranslateX(x);
         ship.setTranslateY(y);
+    }
+    
+    public Polygon getShip() {
+        return ship;
     }
 }

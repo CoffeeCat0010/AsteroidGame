@@ -24,15 +24,16 @@ public class GamePane extends Pane{
         this.setMinHeight(USE_PREF_SIZE);
         this.setMaxHeight(USE_PREF_SIZE);
         this.setPrefHeight(GameConsts.HEIGHT);
-        new Thread(new UpdateGameState(gateway)).start();
+        new Thread(new UpdateGameState(gamestate)).start();
+        new Thread(new UpdateGameScore(gateway)).start();
     }
     
     private void handleKey(KeyEvent evt) {
         KeyCode code = evt.getCode();
         if(code == KeyCode.LEFT) {
-            //gateway.movePlayer(true);
+            //gatestate.movePlayer(true);
         } else if(code == KeyCode.RIGHT) {
-            //gateway.movePlayer(false);
+            //gatestate.movePlayer(false);
         }
     }
     
@@ -44,10 +45,10 @@ public class GamePane extends Pane{
     
 }
 
-class UpdateProgressBar implements Runnable {
+class UpdateGameScore implements Runnable {
     private Gateway gateway;
     
-    public UpdateProgressBar(Gateway gateway) {
+    public UpdateGameScore(Gateway gateway) {
         this.gateway = gateway;
     }
     
@@ -75,18 +76,20 @@ class UpdateGameState implements Runnable {
     }
     
     public void run() {
-        while(true) {
-            try {
-                /*
-                Thread.sleep(250);
-                if(gateway.open())
-                    gateway.refresh();
-                else
-                    break;
-                */
-            } catch(Exception ex) {
-                
-            }
+        double ns = 1000000000.0 / 60.0;
+        double delta = 0;
+
+        long lastTime = System.nanoTime();
+
+        while (true) {
+        long now = System.nanoTime();
+        delta += (now - lastTime) / ns;
+        lastTime = now;
+
+        while (delta >= 1) {
+            //gamestate.update();
+            delta--;
         }
+    }
     }
 }

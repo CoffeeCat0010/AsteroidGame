@@ -7,6 +7,7 @@ package edu.lawrence.asteroidgame.Network;
 
 import edu.lawrence.asteroidgame.Network.Messages.GetProgressMessage;
 import edu.lawrence.asteroidgame.Network.Messages.Message;
+import edu.lawrence.asteroidgame.Network.Messages.ProgressMessage;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -35,12 +36,25 @@ public class Gateway {
     
     public synchronized void refresh(){
         Message[] messages = {new GetProgressMessage(1), new GetProgressMessage(2)};
+        Message[] received = null;
         try {
             OOS.writeObject(messages);
             OOS.flush();
+            
+            received = (Message[]) OIS.readObject();
+            for(Message m : received){
+                switch(m.getMessageType()){
+                    case NetworkConsts.UPDATED_PROGRESS:
+                        int progress = ((ProgressMessage)m).getUpdatedProgress();
+                        System.out.println(progress); break;
+                }
+            }   
         } catch (IOException ex) {
             ex.printStackTrace();
+        } catch (ClassNotFoundException ex) {
+            ex.printStackTrace();
         }
+        
         
     } 
         public void close(){

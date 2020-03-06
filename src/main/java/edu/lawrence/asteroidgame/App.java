@@ -19,11 +19,10 @@ public class App extends Application {
         Gateway gateway = new Gateway();
         GameState gamestate = new GameState();
         GamePane pane = new GamePane(gateway,gamestate);
-        var scene = new Scene(pane, 480, 640);
+        var scene = new Scene(pane, GameConsts.WIDTH, GameConsts.HEIGHT);
         pane.requestFocus();
         stage.setScene(scene);
-        //Some error occurs, preventing the window from closing due to this line currently
-        //stage.setOnCloseRequest(e->gateway.close());
+        stage.setOnCloseRequest(e->gateway.close());
         stage.setTitle("Asteroid");
         stage.show();
     }

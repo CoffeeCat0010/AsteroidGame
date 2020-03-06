@@ -31,9 +31,9 @@ public class GamePane extends Pane{
     private void handleKey(KeyEvent evt) {
         KeyCode code = evt.getCode();
         if(code == KeyCode.LEFT) {
-            //gatestate.movePlayer(true);
+            gamestate.movePlayer(true);
         } else if(code == KeyCode.RIGHT) {
-            //gatestate.movePlayer(false);
+            gamestate.movePlayer(false);
         }
     }
     
@@ -87,7 +87,7 @@ class UpdateGameState implements Runnable {
         lastTime = now;
 
         while (delta >= 1) {
-            //gamestate.update();
+            gamestate.update();
             delta--;
         }
     }

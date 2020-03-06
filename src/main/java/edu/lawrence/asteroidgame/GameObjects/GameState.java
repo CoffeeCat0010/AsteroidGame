@@ -17,17 +17,16 @@ public class GameState implements GameConsts{
     public GameState() {
         shapes = new ArrayList<Shape>();
         asteroids = new ArrayList<Asteroid>();
-        ship = new PlayerShip(WIDTH/2,HEIGHT);
+        ship = new PlayerShip();
         shapes.add(ship.getShip());
-        /*
-        public synchronized void movePaddle(boolean up) {
-        if(up)
-            outputToServer.println(MOVE_UP);
-        else
-            outputToServer.println(MOVE_DOWN);
-        outputToServer.flush();
-        }
-        */
+    }
+    
+    public synchronized void movePlayer(boolean left) {
+        ship.update(left);
+    }
+    
+    public synchronized void update() {
+        ship.draw();
     }
     
     public List<Shape> getShapes() { return shapes; }

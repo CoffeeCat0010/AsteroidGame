@@ -1,5 +1,7 @@
 package edu.lawrence.asteroidgame;
 
+import edu.lawrence.asteroidgame.GameObjects.GameState;
+import edu.lawrence.asteroidgame.Network.Gateway;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
@@ -13,12 +15,16 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) {
-        var javaVersion = SystemInfo.javaVersion();
-        var javafxVersion = SystemInfo.javafxVersion();
-
-        var label = new Label("Hello, JavaFX " + javafxVersion + ", running on Java " + javaVersion + ".");
-        var scene = new Scene(new StackPane(label), 640, 480);
+        
+        Gateway gateway = new Gateway();
+        GameState gamestate = new GameState();
+        GamePane pane = new GamePane(gateway,gamestate);
+        var scene = new Scene(pane, 480, 640);
+        pane.requestFocus();
         stage.setScene(scene);
+        //Some error occurs, preventing the window from closing due to this line currently
+        //stage.setOnCloseRequest(e->gateway.close());
+        stage.setTitle("Asteroid");
         stage.show();
     }
 

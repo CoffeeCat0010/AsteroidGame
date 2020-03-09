@@ -38,44 +38,55 @@ public class GameState implements GameConsts{
     
     public void evolve(double time) {
         lock.lock();
-        iter = asteroids.iterator();
-        while (iter.hasNext()) {
-            tempAst = iter.next();
-            if(ship.collision(tempAst.getRay(),time)) {
-                score = score - 500;
-                iter.remove();
-            } else {
-                tempAst.move(time);
-                if(tempAst.getY() > HEIGHT) {
+        try {
+            iter = asteroids.iterator();
+            while (iter.hasNext()) {
+                tempAst = iter.next();
+                if(ship.collision(tempAst.getRay(),time)) {
+                    score = score - 500;
+                    System.out.println("Score -500");
                     iter.remove();
+                } else {
+                    tempAst.move(time);
+                    if(tempAst.getY() > HEIGHT) {
+                        iter.remove();
+                    }
                 }
             }
+        } finally {
+            lock.unlock();
         }
-        lock.unlock();
     }
     
     public void spawnAst() {
         lock.lock();
-        Random random = new Random();
-        double position;
-        position = (random.nextInt(2)+1)*WIDTH*(1/3);
-        asteroids.add(new Asteroid(5,position,0));
-        lock.unlock();
+        try {
+            Random random = new Random();
+            double position;
+            position = (random.nextInt(3)-1)*(WIDTH/3)+WIDTH/2;
+            asteroids.add(new Asteroid(5,position,0));
+        } finally {
+            lock.unlock();
+        }
     }
     
     public void update() {
         lock.lock();
-        score = score + 1;
-        ship.draw();
-        iter = asteroids.iterator();
-        shapes.clear();
-        shapes.add(ship.getShip());
-        while (iter.hasNext()) {
-            shapes.add(tempAst.getAsteroid());
-            tempAst = iter.next();
-            tempAst.draw();
+        try {
+            score = score + 1;
+            ship.draw();
+            iter = asteroids.iterator();
+            shapes.clear();
+            shapes.add(ship.getShip());
+            while (iter.hasNext()) {
+                tempAst = iter.next();
+                shapes.add(tempAst.getAsteroid());
+                tempAst.draw();
+            }
+            System.out.println(shapes);
+        } finally {
+            lock.unlock();
         }
-        lock.unlock();
     }
     
     public List<Shape> getShapes() { return shapes; }

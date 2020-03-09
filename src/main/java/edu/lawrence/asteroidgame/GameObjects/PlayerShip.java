@@ -20,11 +20,12 @@ public class PlayerShip implements GameConsts{
     
     public PlayerShip(){
         walls = new ArrayList<LineSegment>();
-        walls.add(new LineSegment(new Point(x-10,y), new Point(x+10,y)));
-        walls.add(new LineSegment(new Point(x+10,y), new Point(x,y-30)));
-        walls.add(new LineSegment(new Point(x,y-30), new Point(x-10,y)));
         this.x = WIDTH/2;
         this.y = HEIGHT;
+        walls.add(new LineSegment(new Point(x-10,y), new Point(x+10,y)));
+        walls.add(new LineSegment(new Point(x+10,y), new Point(x+10,y-30)));
+        walls.add(new LineSegment(new Point(x+10,y-30), new Point(x-10,y-30)));
+        walls.add(new LineSegment(new Point(x-10,y-30), new Point(x-10,y)));
         ship = new Polygon(x-10,y,x+10,y,x,y-30);
         ship.setFill(Color.BLUE);
     }
@@ -39,7 +40,7 @@ public class PlayerShip implements GameConsts{
             this.x = this.x + WIDTH/3;
             
             for(int i=0;i<walls.size();i++)
-            walls.get(i).move(-WIDTH/3,0);
+            walls.get(i).move(WIDTH/3,0);
         }
     }
     

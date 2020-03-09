@@ -26,10 +26,15 @@ public class App extends Application {
         stage.setOnCloseRequest(e->gateway.close());
         stage.setTitle("Asteroid");
         stage.show();
+        /*
         Platform.runLater(() -> {
-            pane.getChildren().clear();
-            pane.getChildren().addAll(gamestate.getShapes());
+            while(true) {
+                System.out.println("runLater is running");
+                pane.getChildren().clear();
+                pane.getChildren().addAll(gamestate.getShapes());
+            }
         });
+        */
     }
 
     public static void main(String[] args) {

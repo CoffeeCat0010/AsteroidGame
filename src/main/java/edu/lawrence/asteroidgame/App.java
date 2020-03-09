@@ -3,6 +3,7 @@ package edu.lawrence.asteroidgame;
 import edu.lawrence.asteroidgame.GameObjects.GameState;
 import edu.lawrence.asteroidgame.Network.Gateway;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
@@ -25,6 +26,10 @@ public class App extends Application {
         stage.setOnCloseRequest(e->gateway.close());
         stage.setTitle("Asteroid");
         stage.show();
+        Platform.runLater(() -> {
+            pane.getChildren().clear();
+            pane.getChildren().addAll(gamestate.getShapes());
+        });
     }
 
     public static void main(String[] args) {

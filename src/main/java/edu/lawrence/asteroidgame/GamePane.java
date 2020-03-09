@@ -2,9 +2,11 @@ package edu.lawrence.asteroidgame;
 
 import edu.lawrence.asteroidgame.GameObjects.GameState;
 import edu.lawrence.asteroidgame.Network.Gateway;
+import java.util.List;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
+import javafx.scene.shape.Shape;
 /**
  *
  * @author alan
@@ -35,6 +37,11 @@ public class GamePane extends Pane{
         } else if(code == KeyCode.RIGHT) {
             gamestate.movePlayer(false);
         }
+    }
+    
+    public void updateShapes(List<Shape> shapes) {
+        this.getChildren().clear();
+        this.getChildren().addAll(gamestate.getShapes());
     }
     
     @Override
@@ -78,6 +85,7 @@ class UpdateGameState implements Runnable {
     public void run() {
         double ns = 1000000000.0 / 60.0;
         double delta = 0;
+        int astTimer = 0;
 
         long lastTime = System.nanoTime();
 
@@ -87,8 +95,14 @@ class UpdateGameState implements Runnable {
         lastTime = now;
 
         while (delta >= 1) {
+            if(astTimer >= 180) {
+                gamestate.spawnAst();
+                astTimer = 0;
+            }
+            gamestate.evolve(10);
             gamestate.update();
             delta--;
+            astTimer++;
         }
     }
     }

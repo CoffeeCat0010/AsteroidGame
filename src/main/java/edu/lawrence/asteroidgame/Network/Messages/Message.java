@@ -6,12 +6,13 @@
 package edu.lawrence.asteroidgame.Network.Messages;
 
 import edu.lawrence.asteroidgame.Network.NetworkConsts;
+import java.io.Serializable;
 
 /**
  *
  * @author Justin
  */
-public class Message implements NetworkConsts{
+public class Message implements NetworkConsts, Serializable{
     private final int messageType;
     
     protected Message(int messageType){

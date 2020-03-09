@@ -12,6 +12,9 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  *
@@ -20,12 +23,16 @@ import java.net.Socket;
 public class Gateway {
     private ObjectInputStream OIS;
     private ObjectOutputStream OOS;
+    private ArrayList<Message> messageQueue;
     private int progress;
     private boolean isOpen = true;
+    private ReadWriteLock lock;
     
     public Gateway(){
+        messageQueue = new ArrayList<Message>();
+        lock = new ReentrantReadWriteLock();
         try{
-            Socket socket = new Socket("localhost", 8000);
+            Socket socket = new Socket("143.44.68.130", 8000);
             OIS = new ObjectInputStream(socket.getInputStream());
             OOS = new ObjectOutputStream(socket.getOutputStream());
             progress = 0;
@@ -34,8 +41,18 @@ public class Gateway {
         }
     }
     
+    public void pushMessage(Message message){
+        lock.writeLock().lock();
+        messageQueue.add(message);
+        lock.writeLock().unlock();
+    }
+    
+    
     public synchronized void refresh(){
-        Message[] messages = {new GetProgressMessage(1), new GetProgressMessage(2)};
+        lock.readLock().lock();
+        Message[] messages = messageQueue.toArray(new Message[0]);
+        messageQueue.clear();
+        lock.readLock().unlock();
         Message[] received = null;
         try {
             OOS.writeObject(messages);
@@ -57,6 +74,9 @@ public class Gateway {
         
         
     } 
+        public boolean isOpen(){
+            return isOpen;
+        }
         public void close(){
             try{
                 OIS.close();

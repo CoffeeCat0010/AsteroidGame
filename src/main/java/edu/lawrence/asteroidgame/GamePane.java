@@ -2,6 +2,7 @@ package edu.lawrence.asteroidgame;
 
 import edu.lawrence.asteroidgame.GameObjects.GameState;
 import edu.lawrence.asteroidgame.Network.Gateway;
+import edu.lawrence.asteroidgame.Network.Messages.GetProgressMessage;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
@@ -12,10 +13,10 @@ import javafx.scene.layout.Pane;
 public class GamePane extends Pane{
     private Gateway gateway;
     private GameState gamestate;
-    
     public GamePane(Gateway gateway, GameState gamestate) {
         this.gateway = gateway;
         this.gamestate = gamestate;
+        this.getChildren().add(gamestate.getProgress());
         this.getChildren().addAll(gamestate.getShapes());
         this.setOnKeyPressed(e->handleKey(e));
         this.setMinWidth(USE_PREF_SIZE);
@@ -55,15 +56,17 @@ class UpdateGameScore implements Runnable {
     public void run() {
         while(true) {
             try {
-                /*
+                
                 Thread.sleep(250);
-                if(gateway.open())
+                if(gateway.isOpen()){
+                    gateway.pushMessage(new GetProgressMessage(1));
                     gateway.refresh();
+                }
                 else
                     break;
-                */
-            } catch(Exception ex) {
                 
+            } catch(Exception ex) {
+                ex.printStackTrace();
             }
         }
     }

@@ -58,6 +58,16 @@ public class PlayerShip implements GameConsts{
             LineSegment seg = in.toSegment(time);
             intersect = walls.get(i).intersection(seg);
             if(intersect != null) {
+                ship.setFill(Color.RED);
+                new java.util.Timer().schedule( 
+                    new java.util.TimerTask() {
+                        @Override
+                        public void run() {
+                            ship.setFill(Color.BLUE);
+                        }
+                    }, 
+                    100
+                );
                 return true;
             }
         }

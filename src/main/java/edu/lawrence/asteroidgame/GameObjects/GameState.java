@@ -2,6 +2,7 @@ package edu.lawrence.asteroidgame.GameObjects;
 
 import edu.lawrence.asteroidgame.GameConsts;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
@@ -23,7 +24,8 @@ public class GameState implements GameConsts{
     private int score = 0;
     
     public GameState() {
-        shapes = new ArrayList<Shape>();
+        //shapes = new ArrayList<Shape>();
+        shapes = Collections.synchronizedList(new ArrayList<Shape>());
         asteroids = new ArrayList<Asteroid>();
         ship = new PlayerShip();
         shapes.add(ship.getShip());
@@ -33,6 +35,15 @@ public class GameState implements GameConsts{
     public void movePlayer(boolean left) {
         lock.lock();
         ship.update(left);
+        iter = asteroids.iterator();
+            while (iter.hasNext()) {
+                tempAst = iter.next();
+                if(ship.collision(tempAst.getRay(),5) || ship.collision(tempAst.getRay(), -5)) {
+                    score = score - 50;
+                    System.out.println("Score -50, current score: " + score);
+                    iter.remove();
+                }
+            }
         lock.unlock();
     }
     
@@ -43,8 +54,8 @@ public class GameState implements GameConsts{
             while (iter.hasNext()) {
                 tempAst = iter.next();
                 if(ship.collision(tempAst.getRay(),time)) {
-                    score = score - 500;
-                    System.out.println("Score -500");
+                    score = score - 50;
+                    System.out.println("Score -50, current score: " + score);
                     iter.remove();
                 } else {
                     tempAst.move(time);
@@ -64,7 +75,7 @@ public class GameState implements GameConsts{
             Random random = new Random();
             double position;
             position = (random.nextInt(3)-1)*(WIDTH/3)+WIDTH/2;
-            asteroids.add(new Asteroid(5,position,0));
+            asteroids.add(new Asteroid(20,position,0));
         } finally {
             lock.unlock();
         }
@@ -73,7 +84,7 @@ public class GameState implements GameConsts{
     public void update() {
         lock.lock();
         try {
-            score = score + 1;
+            score = score + 2;
             ship.draw();
             iter = asteroids.iterator();
             shapes.clear();
@@ -83,11 +94,12 @@ public class GameState implements GameConsts{
                 shapes.add(tempAst.getAsteroid());
                 tempAst.draw();
             }
-            System.out.println(shapes);
         } finally {
             lock.unlock();
         }
     }
     
-    public List<Shape> getShapes() { return shapes; }
+    public List<Shape> getShapes() { 
+        return shapes; 
+    }
 }

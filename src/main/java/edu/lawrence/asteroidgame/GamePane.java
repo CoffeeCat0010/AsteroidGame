@@ -3,6 +3,8 @@ package edu.lawrence.asteroidgame;
 import edu.lawrence.asteroidgame.GameObjects.GameState;
 import edu.lawrence.asteroidgame.Network.Gateway;
 import java.util.List;
+import java.util.Random;
+import javafx.application.Platform;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
@@ -26,7 +28,7 @@ public class GamePane extends Pane{
         this.setMinHeight(USE_PREF_SIZE);
         this.setMaxHeight(USE_PREF_SIZE);
         this.setPrefHeight(GameConsts.HEIGHT);
-        new Thread(new UpdateGameState(gamestate)).start();
+        new Thread(new UpdateGameState(this, gamestate)).start();
         new Thread(new UpdateGameScore(gateway)).start();
     }
     
@@ -34,8 +36,12 @@ public class GamePane extends Pane{
         KeyCode code = evt.getCode();
         if(code == KeyCode.LEFT) {
             gamestate.movePlayer(true);
+            this.getChildren().clear();
+            this.getChildren().addAll(gamestate.getShapes());
         } else if(code == KeyCode.RIGHT) {
             gamestate.movePlayer(false);
+            this.getChildren().clear();
+            this.getChildren().addAll(gamestate.getShapes());
         }
     }
     
@@ -75,35 +81,46 @@ class UpdateGameScore implements Runnable {
         }
     }
 }
+
 class UpdateGameState implements Runnable {
     private GameState gamestate;
+    private GamePane gamepane;
     
-    public UpdateGameState(GameState gamestate) {
+    public UpdateGameState(GamePane gamepane, GameState gamestate) {
         this.gamestate = gamestate;
+        this.gamepane = gamepane;
     }
     
     public void run() {
+        //Game update cycle based on code from here: https://stackoverflow.com/questions/30443458/spawning-mutiple-circles-and-make-them-move/30443968#30443968
         double ns = 1000000000.0 / 60.0;
         double delta = 0;
         int astTimer = 0;
+        int randTimer = 100;
+        Random random = new Random();
 
         long lastTime = System.nanoTime();
 
         while (true) {
-        long now = System.nanoTime();
-        delta += (now - lastTime) / ns;
-        lastTime = now;
+            long now = System.nanoTime();
+            delta += (now - lastTime) / ns;
+            lastTime = now;
 
-        while (delta >= 1) {
-            if(astTimer >= 180) {
-                gamestate.spawnAst();
-                astTimer = 0;
+            while (delta >= 1) {
+                gamestate.evolve(10);
+                if(astTimer >= randTimer) {
+                    gamestate.spawnAst();
+                    astTimer = 0;
+                    randTimer = random.nextInt(20)+10;
+                }
+                gamestate.update();
+                Platform.runLater(() -> {
+                    gamepane.getChildren().clear();
+                    gamepane.getChildren().addAll(gamestate.getShapes());
+                });
+                delta--;
+                astTimer++;
             }
-            gamestate.evolve(10);
-            gamestate.update();
-            delta--;
-            astTimer++;
         }
-    }
     }
 }

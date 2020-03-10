@@ -38,9 +38,9 @@ public class GameState implements GameConsts{
         iter = asteroids.iterator();
             while (iter.hasNext()) {
                 tempAst = iter.next();
-                if(ship.collision(tempAst.getRay(),2) && ship.collision(tempAst.getRay(), -2)) {
-                    score = score - 500;
-                    System.out.println("Score -500");
+                if(ship.contains(tempAst.getX(),tempAst.getY())) {
+                    score = score - 50;
+                    System.out.println("Score -50, current score: " + score);
                     iter.remove();
                 }
             }

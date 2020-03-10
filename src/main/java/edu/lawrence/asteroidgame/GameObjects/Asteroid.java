@@ -40,6 +40,10 @@ public class Asteroid {
         return asteroidShape;
     }
     
+    public double getX() {
+        return x;
+    }
+    
     public double getY() {
         return y;
     }

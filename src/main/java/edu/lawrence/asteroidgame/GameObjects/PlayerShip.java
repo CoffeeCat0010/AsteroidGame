@@ -74,8 +74,8 @@ public class PlayerShip implements GameConsts{
         return false;
     }
     
-    public boolean contains(Point p) {
-        if(p.x >= x - 10 && p.x <= x + 10 && p.y >= y - 30 && p.y <= y)
+    public boolean contains(double x, double y) {
+        if(x >= this.x - 10 && x <= this.x + 10 && y >= this.y - 30 && y <= this.y)
             return true;
         return false;
     }

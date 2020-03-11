@@ -113,7 +113,6 @@ public class GameState implements GameConsts {
         } finally {
             lock.unlock();
         }
-    Platform.runLater (() -> progress.setText(String.valueOf(score)));
     }
 
     public List<Shape> getShapes() { return shapes; }

@@ -3,6 +3,7 @@ package edu.lawrence.asteroidgame;
 import edu.lawrence.asteroidgame.GameObjects.GameState;
 import edu.lawrence.asteroidgame.Network.Gateway;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 

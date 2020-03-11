@@ -4,6 +4,8 @@ import edu.lawrence.networklib.GetProgressMessage;
 import edu.lawrence.asteroidgame.GameObjects.GameState;
 import edu.lawrence.asteroidgame.Network.Gateway;
 import edu.lawrence.networklib.ProgressMessage;
+import java.util.Random;
+import javafx.application.Platform;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
@@ -51,8 +53,12 @@ public class GamePane extends Pane{
         KeyCode code = evt.getCode();
         if(code == KeyCode.LEFT) {
             gamestate.movePlayer(true);
+            this.getChildren().clear();
+            this.getChildren().addAll(gamestate.getShapes());
         } else if(code == KeyCode.RIGHT) {
             gamestate.movePlayer(false);
+            this.getChildren().clear();
+            this.getChildren().addAll(gamestate.getShapes());
         }
     }
     
@@ -109,17 +115,20 @@ class UpdateGameScore implements Runnable {
     }
 }
 class UpdateGameState implements Runnable {
-    private GameState gamestate;
+    private GameState gameState;
     private GamePane pane;
     
     public UpdateGameState(GamePane pane,GameState gamestate) {
-        this.gamestate = gamestate;
+        this.gameState = gamestate;
         this.pane = pane;
     }
     
     public void run() {
         double ns = 1000000000.0 / 60.0;
         double delta = 0;
+        int astTimer = 0;
+        int randTimer = 100;
+        Random random = new Random();
 
         long lastTime = System.nanoTime();
 
@@ -127,9 +136,20 @@ class UpdateGameState implements Runnable {
         long now = System.nanoTime();
         delta += (now - lastTime) / ns;
         lastTime = now;
-            while (delta >= 1 && gamestate.isStarted()) {
-                gamestate.update();
+            while (delta >= 1 && gameState.isStarted()) {
+                gameState.evolve(10);
+                if (astTimer >= randTimer){
+                    gameState.spawnAst();
+                    astTimer = 0;
+                    randTimer = random.nextInt(20) + 10;
+                }
+                gameState.update();
+                Platform.runLater(() -> {
+                    pane.getChildren().clear();
+                    pane.getChildren().addAll(gameState.getShapes());
+                      });
                 delta--;
+                astTimer ++;
             }
         }   
     }

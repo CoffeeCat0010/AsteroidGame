@@ -5,6 +5,7 @@
  */
 package edu.lawrence.asteroidgame.GameObjects;
 
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 
 /**
@@ -14,9 +15,14 @@ import javafx.scene.shape.Circle;
 public class Asteroid {
     private Circle asteroidShape;
     private double x, y;
+    private Ray r;
     
     public Asteroid(double radius, double x, double y){
         asteroidShape = new Circle(radius);
+        asteroidShape.setFill(Color.GREY);
+        Vector v = new Vector(0,2);
+        double speed = v.length();
+        r = new Ray(new Point(x,y),v,speed);
         update(x, y);
     }
     
@@ -30,4 +36,29 @@ public class Asteroid {
         this.y = y;
     }
     
+    public Circle getAsteroid() {
+        return asteroidShape;
+    }
+    
+    public double getX() {
+        return x;
+    }
+    
+    public double getY() {
+        return y;
+    }
+    
+    public Ray getRay() {
+        return r;
+    }
+    
+    public void setRay(Ray r) {
+        this.r = r;
+    }
+    
+    public void move(double time) {
+        this.x = r.endPoint(time).getX();
+        this.y = r.endPoint(time).getY();
+        r = new Ray(r.endPoint(time),r.v,r.speed);
+    }
 }

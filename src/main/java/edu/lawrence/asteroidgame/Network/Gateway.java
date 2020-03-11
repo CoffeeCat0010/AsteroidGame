@@ -5,9 +5,10 @@
  */
 package edu.lawrence.asteroidgame.Network;
 
-import edu.lawrence.asteroidgame.Network.Messages.GetProgressMessage;
-import edu.lawrence.asteroidgame.Network.Messages.Message;
-import edu.lawrence.asteroidgame.Network.Messages.ProgressMessage;
+import edu.lawrence.asteroidgame.GameObjects.GameState;
+import edu.lawrence.networklib.Message;
+import edu.lawrence.networklib.NetworkConsts;
+import edu.lawrence.networklib.ProgressMessage;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -23,12 +24,14 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 public class Gateway {
     private ObjectInputStream OIS;
     private ObjectOutputStream OOS;
+    private GameState gameState;
     private ArrayList<Message> messageQueue;
     private int progress;
     private boolean isOpen = true;
     private ReadWriteLock lock;
     
-    public Gateway(){
+    public Gateway(GameState gameState){
+        this.gameState = gameState;
         messageQueue = new ArrayList<Message>();
         lock = new ReentrantReadWriteLock();
         try{
@@ -57,13 +60,14 @@ public class Gateway {
         try {
             OOS.writeObject(messages);
             OOS.flush();
-            
             received = (Message[]) OIS.readObject();
             for(Message m : received){
                 switch(m.getMessageType()){
                     case NetworkConsts.UPDATED_PROGRESS:
                         int progress = ((ProgressMessage)m).getUpdatedProgress();
                         System.out.println(progress); break;
+                    case NetworkConsts.START:
+                        gameState.setStarted(true);       
                 }
             }   
         } catch (IOException ex) {

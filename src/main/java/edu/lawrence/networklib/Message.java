@@ -3,9 +3,8 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.lawrence.asteroidgame.Network.Messages;
+package edu.lawrence.networklib;
 
-import edu.lawrence.asteroidgame.Network.NetworkConsts;
 import java.io.Serializable;
 
 /**
@@ -15,7 +14,7 @@ import java.io.Serializable;
 public class Message implements NetworkConsts, Serializable{
     private final int messageType;
     
-    protected Message(int messageType){
+    public Message(int messageType){
         this.messageType = messageType;
     }
 

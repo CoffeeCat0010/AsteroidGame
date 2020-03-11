@@ -1,8 +1,9 @@
 package edu.lawrence.asteroidgame;
 
+import edu.lawrence.networklib.GetProgressMessage;
 import edu.lawrence.asteroidgame.GameObjects.GameState;
 import edu.lawrence.asteroidgame.Network.Gateway;
-import edu.lawrence.asteroidgame.Network.Messages.GetProgressMessage;
+import edu.lawrence.networklib.ProgressMessage;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
@@ -13,6 +14,11 @@ import javafx.scene.layout.Pane;
 public class GamePane extends Pane{
     private Gateway gateway;
     private GameState gamestate;
+    private Boolean isStarted = false;
+    private Boolean shouldClose = false;
+    
+    private Thread gameStateThread;
+    private Thread gameScoreThread;
     public GamePane(Gateway gateway, GameState gamestate) {
         this.gateway = gateway;
         this.gamestate = gamestate;
@@ -25,8 +31,20 @@ public class GamePane extends Pane{
         this.setMinHeight(USE_PREF_SIZE);
         this.setMaxHeight(USE_PREF_SIZE);
         this.setPrefHeight(GameConsts.HEIGHT);
-        new Thread(new UpdateGameState(gamestate)).start();
-        new Thread(new UpdateGameScore(gateway)).start();
+        gameStateThread = new Thread(new UpdateGameState(this, gamestate));
+        gameScoreThread = new Thread(new UpdateGameScore(this, gateway, gamestate));
+        gameStateThread.start();
+        gameScoreThread.start();
+    }
+    
+    public void close(){
+            shouldClose = true;
+        try {
+            gameStateThread.join();
+            gameScoreThread.join();
+        } catch (InterruptedException ex) {
+            ex.printStackTrace();
+        }
     }
     
     private void handleKey(KeyEvent evt) {
@@ -42,24 +60,43 @@ public class GamePane extends Pane{
     public boolean isResizable() {
         return false; 
     }
+
+    public Boolean getIsStarted() {
+        return isStarted;
+    }
+
+    public void setIsStarted(Boolean isStarted) {
+        this.isStarted = isStarted;
+    }
+
+    public Boolean shouldClose() {
+        return shouldClose;
+    }
     
     
 }
 
 class UpdateGameScore implements Runnable {
     private Gateway gateway;
+    private GameState gameState;
+    private GamePane pane;
     
-    public UpdateGameScore(Gateway gateway) {
+    public UpdateGameScore(GamePane pane, Gateway gateway, GameState gameState) {
         this.gateway = gateway;
+        this.gameState = gameState;
+        this.pane = pane;
     }
     
     public void run() {
-        while(true) {
+        while(!pane.shouldClose()) {
             try {
                 
                 Thread.sleep(250);
                 if(gateway.isOpen()){
+                    if(gameState.isStarted()){
                     gateway.pushMessage(new GetProgressMessage(1));
+                    gateway.pushMessage(new ProgressMessage(gameState.getScore()));
+                    }
                     gateway.refresh();
                 }
                 else
@@ -73,9 +110,11 @@ class UpdateGameScore implements Runnable {
 }
 class UpdateGameState implements Runnable {
     private GameState gamestate;
+    private GamePane pane;
     
-    public UpdateGameState(GameState gamestate) {
+    public UpdateGameState(GamePane pane,GameState gamestate) {
         this.gamestate = gamestate;
+        this.pane = pane;
     }
     
     public void run() {
@@ -84,15 +123,14 @@ class UpdateGameState implements Runnable {
 
         long lastTime = System.nanoTime();
 
-        while (true) {
+        while (!pane.shouldClose()) {
         long now = System.nanoTime();
         delta += (now - lastTime) / ns;
         lastTime = now;
-
-        while (delta >= 1) {
-            gamestate.update();
-            delta--;
-        }
-    }
+            while (delta >= 1 && gamestate.isStarted()) {
+                gamestate.update();
+                delta--;
+            }
+        }   
     }
 }

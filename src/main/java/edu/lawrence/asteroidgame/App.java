@@ -16,13 +16,13 @@ public class App extends Application {
     @Override
     public void start(Stage stage) {
         
-        gateway = new Gateway();
         gameState = new GameState();
+        gateway = new Gateway(gameState);
         GamePane pane = new GamePane(gateway, gameState);
         var scene = new Scene(pane, GameConsts.WIDTH, GameConsts.HEIGHT);
         pane.requestFocus();
         stage.setScene(scene);
-        stage.setOnCloseRequest(e->gateway.close());
+        stage.setOnCloseRequest(e->{pane.close(); gateway.close();});
         stage.setTitle("Asteroid");
         stage.show();
         

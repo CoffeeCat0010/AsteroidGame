@@ -53,13 +53,21 @@ public class GamePane extends Pane{
         KeyCode code = evt.getCode();
         if(code == KeyCode.LEFT) {
             gamestate.movePlayer(true);
-            this.getChildren().clear();
-            this.getChildren().addAll(gamestate.getShapes());
+            refresh(gamestate);
         } else if(code == KeyCode.RIGHT) {
             gamestate.movePlayer(false);
-            this.getChildren().clear();
-            this.getChildren().addAll(gamestate.getShapes());
+            refresh(gamestate);
         }
+    }
+    
+    public void refresh(GameState gameState) {
+        this.getChildren().clear();
+        this.getChildren().addAll(gameState.getShapes());
+        gameState.getProgress().setText("Score: " + String.valueOf(gameState.getScore()));
+        gateway.getProgress2().setText("Score: " + String.valueOf(gateway.getScore2()));
+        this.getChildren().add(gameState.getProgress());
+        this.getChildren().add(gateway.getProgress2());
+        this.getChildren().add(gateway.getGameOver());
     }
     
     @Override
@@ -104,6 +112,8 @@ class UpdateGameScore implements Runnable {
                     gateway.pushMessage(new ProgressMessage(gameState.getScore()));
                     }
                     gateway.refresh();
+                    if(gateway.isGameOver()) 
+                        pane.close();
                 }
                 else
                     break;
@@ -145,8 +155,7 @@ class UpdateGameState implements Runnable {
                 }
                 gameState.update();
                 Platform.runLater(() -> {
-                    pane.getChildren().clear();
-                    pane.getChildren().addAll(gameState.getShapes());
+                    pane.refresh(gameState);
                       });
                 delta--;
                 astTimer ++;

@@ -1,11 +1,13 @@
 package edu.lawrence.asteroidgame;
 
+import static edu.lawrence.asteroidgame.GameConsts.WIDTH;
 import edu.lawrence.networklib.GetProgressMessage;
 import edu.lawrence.asteroidgame.GameObjects.GameState;
 import edu.lawrence.asteroidgame.Network.Gateway;
 import edu.lawrence.networklib.ProgressMessage;
 import java.util.Random;
 import javafx.application.Platform;
+import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
@@ -16,15 +18,19 @@ import javafx.scene.layout.Pane;
 public class GamePane extends Pane{
     private Gateway gateway;
     private GameState gamestate;
-    private Boolean isStarted = false;
-    private Boolean shouldClose = false;
-    
+    private boolean isStarted = false;
+    private boolean shouldClose = false;
+    private boolean isGameOver = false; 
+    private Label scoreP1;
+    private Label scoreP2;
+    private Label gameOver;
+
     private Thread gameStateThread;
     private Thread gameScoreThread;
+
     public GamePane(Gateway gateway, GameState gamestate) {
         this.gateway = gateway;
         this.gamestate = gamestate;
-        this.getChildren().add(gamestate.getProgress());
         this.getChildren().addAll(gamestate.getShapes());
         this.setOnKeyPressed(e->handleKey(e));
         this.setMinWidth(USE_PREF_SIZE);
@@ -33,6 +39,15 @@ public class GamePane extends Pane{
         this.setMinHeight(USE_PREF_SIZE);
         this.setMaxHeight(USE_PREF_SIZE);
         this.setPrefHeight(GameConsts.HEIGHT);
+        scoreP1 = new Label();
+        scoreP1.setLayoutX(10);
+        scoreP1.setLayoutY(10);
+        scoreP2 = new Label();
+        scoreP2.setLayoutX(WIDTH-80);
+        scoreP2.setLayoutY(10);
+        gameOver = new Label();
+        gameOver.setLayoutX(WIDTH/2-80);
+        gameOver.setLayoutY(30);
         gameStateThread = new Thread(new UpdateGameState(this, gamestate));
         gameScoreThread = new Thread(new UpdateGameScore(this, gateway, gamestate));
         gameStateThread.start();
@@ -47,6 +62,9 @@ public class GamePane extends Pane{
         } catch (InterruptedException ex) {
             ex.printStackTrace();
         }
+            System.out.println(gameStateThread.isAlive());
+            System.out.println(gameScoreThread.isAlive());
+
     }
     
     private void handleKey(KeyEvent evt) {
@@ -63,11 +81,15 @@ public class GamePane extends Pane{
     public void refresh(GameState gameState) {
         this.getChildren().clear();
         this.getChildren().addAll(gameState.getShapes());
-        gameState.getProgress().setText("Score: " + String.valueOf(gameState.getScore()));
-        gateway.getProgress2().setText("Score: " + String.valueOf(gateway.getScore2()));
-        this.getChildren().add(gameState.getProgress());
-        this.getChildren().add(gateway.getProgress2());
-        this.getChildren().add(gateway.getGameOver());
+        scoreP1.setText("Score: " + String.valueOf(gameState.getScore()));
+        scoreP2.setText("Score: " + String.valueOf(gateway.getScore2()));
+        if(gateway.isGameOver()){
+            gameOver.setText(gateway.isWinner() == true ? "You Win!" : "You are a loser!");
+            isGameOver = true;
+        }
+        this.getChildren().add(scoreP1);
+        this.getChildren().add(scoreP2);
+        this.getChildren().add(gameOver);
     }
     
     @Override
@@ -86,6 +108,10 @@ public class GamePane extends Pane{
     public Boolean shouldClose() {
         return shouldClose;
     }
+
+    public boolean isGameOver() {
+        return isGameOver;
+    }
     
     
 }
@@ -102,26 +128,21 @@ class UpdateGameScore implements Runnable {
     }
     
     public void run() {
-        while(!pane.shouldClose()) {
-            try {
-                
+        while(!pane.shouldClose() && !pane.isGameOver()) {
+            try { 
                 Thread.sleep(250);
                 if(gateway.isOpen()){
                     if(gameState.isStarted()){
                     gateway.pushMessage(new GetProgressMessage(1));
                     gateway.pushMessage(new ProgressMessage(gameState.getScore()));
                     }
-                    gateway.refresh();
-                    if(gateway.isGameOver()) 
-                        pane.close();
-                }
-                else
-                    break;
-                
+                    gateway.refresh(); 
+                }  
             } catch(Exception ex) {
                 ex.printStackTrace();
             }
         }
+    gateway.close();
     }
 }
 class UpdateGameState implements Runnable {
@@ -142,7 +163,7 @@ class UpdateGameState implements Runnable {
 
         long lastTime = System.nanoTime();
 
-        while (!pane.shouldClose()) {
+        while (!pane.shouldClose() && !pane.isGameOver()) {
         long now = System.nanoTime();
         delta += (now - lastTime) / ns;
         lastTime = now;
@@ -154,9 +175,7 @@ class UpdateGameState implements Runnable {
                     randTimer = random.nextInt(20) + 10;
                 }
                 gameState.update();
-                Platform.runLater(() -> {
-                    pane.refresh(gameState);
-                      });
+                Platform.runLater(() -> pane.refresh(gameState));
                 delta--;
                 astTimer ++;
             }

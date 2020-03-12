@@ -17,8 +17,6 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import javafx.application.Platform;
-import javafx.scene.control.Label;
 
 /**
  *
@@ -27,31 +25,28 @@ import javafx.scene.control.Label;
 public class Gateway implements GameConsts{
     private ObjectInputStream OIS;
     private ObjectOutputStream OOS;
+    private Socket socket;
     private GameState gameState;
     private ArrayList<Message> messageQueue;
     private int score2;
     private boolean isOpen = true;
     
+    private boolean isWinner = false;
     private boolean isGameOver = false;
-    private Label progress2;
-    private Label gameOver;
     
     private ReadWriteLock lock;
+    private ReadWriteLock gameOverLock;
     
     public Gateway(GameState gameState){
         this.gameState = gameState;
-        messageQueue = new ArrayList<Message>();
-        
-        progress2 = new Label();
-        progress2.setLayoutX(WIDTH-80);
-        progress2.setLayoutY(10);
-        gameOver = new Label();
-        gameOver.setLayoutX(WIDTH/2-80);
-        gameOver.setLayoutY(30);
         
         lock = new ReentrantReadWriteLock();
+        gameOverLock = new ReentrantReadWriteLock();
+        
+        messageQueue = new ArrayList<Message>();    
+        
         try{
-            Socket socket = new Socket("143.44.68.188", 8000);
+            socket = new Socket("127.0.0.1", 8000);
             OIS = new ObjectInputStream(socket.getInputStream());
             OOS = new ObjectOutputStream(socket.getOutputStream());
             score2 = 0;
@@ -84,16 +79,14 @@ public class Gateway implements GameConsts{
                         System.out.println(score2); break;
                     case NetworkConsts.START:
                         gameState.setStarted(true); break;
-                    /*case NetworkConsts.GAME_END:
-                        Platform.runLater(() -> {
-                            if(true) {
-                                gameOver.setText("YOU WIN");
-                            }else {
-                                gameOver.setText("YOU LOSE");
-                            }
-                        });
+                    case NetworkConsts.WINNER:
+                        isWinner = true;
                         isGameOver = true;
-                    */
+                        break;
+                    case NetworkConsts.LOSER:
+                        isWinner = false;
+                        isGameOver = true;
+                        break;
                 }
             }
         } catch (IOException ex) {
@@ -106,17 +99,20 @@ public class Gateway implements GameConsts{
     public int getScore2() {
         return score2;
     }
-    
-    public Label getProgress2() {
-        return progress2;
+
+    public boolean isWinner() {
+        boolean result;
+        gameOverLock.readLock().lock();
+        result = isWinner;
+        gameOverLock.readLock().unlock();
+        return result;
     }
-    
-    public Label getGameOver() {
-        return gameOver;
-    }
-    
     public boolean isGameOver() {
-        return isGameOver();
+        boolean result;
+        gameOverLock.readLock().lock();
+        result = isGameOver;
+        gameOverLock.readLock().unlock();
+        return result;
     }
     
     public boolean isOpen(){
@@ -127,8 +123,9 @@ public class Gateway implements GameConsts{
         try{
             OIS.close();
             OOS.close();
+            socket.close();
         }catch(IOException IOE){
-
+            IOE.printStackTrace();
         }
         isOpen = false;
     }

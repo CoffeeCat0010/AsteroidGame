@@ -10,8 +10,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import javafx.application.Platform;
-import javafx.scene.control.Label;
 import javafx.scene.shape.Shape;
 
 /**
@@ -23,7 +21,6 @@ public class GameState implements GameConsts {
     private PlayerShip ship;
     private ArrayList<Asteroid> asteroids;
     private List<Shape> shapes;
-    private Label progress;
     private int score = 0;
     private long lastTime = 0;
     private boolean started = false;
@@ -39,9 +36,6 @@ public class GameState implements GameConsts {
         asteroids = new ArrayList<Asteroid>();
         ship = new PlayerShip();
         shapes.add(ship.getShip());
-        progress = new Label();
-        progress.setLayoutX(10);
-        progress.setLayoutY(10);
         progressLock = new ReentrantReadWriteLock();
         startLock = new ReentrantReadWriteLock();
         lock = new ReentrantLock();
@@ -131,10 +125,6 @@ public class GameState implements GameConsts {
 
     }
     
-    public Label getProgress(){
-        return progress;
-    }
-
     public boolean isStarted() {
         boolean result = false;
         try{

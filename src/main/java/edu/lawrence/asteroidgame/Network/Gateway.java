@@ -32,6 +32,7 @@ public class Gateway implements GameConsts{
     private int score2;
     private boolean isOpen = true;
     
+    private boolean isGameOver = false;
     private Label progress2;
     private Label gameOver;
     
@@ -82,9 +83,17 @@ public class Gateway implements GameConsts{
                         score2 = ((ProgressMessage)m).getUpdatedProgress();
                         System.out.println(score2); break;
                     case NetworkConsts.START:
-                        gameState.setStarted(true);/* break;
-                    case NetworkConsts.GAME_END:
-                        gameOver.setText("stuff go here");*/
+                        gameState.setStarted(true); break;
+                    /*case NetworkConsts.GAME_END:
+                        Platform.runLater(() -> {
+                            if(true) {
+                                gameOver.setText("YOU WIN");
+                            }else {
+                                gameOver.setText("YOU LOSE");
+                            }
+                        });
+                        isGameOver = true;
+                    */
                 }
             }
         } catch (IOException ex) {
@@ -104,6 +113,10 @@ public class Gateway implements GameConsts{
     
     public Label getGameOver() {
         return gameOver;
+    }
+    
+    public boolean isGameOver() {
+        return isGameOver();
     }
     
     public boolean isOpen(){

@@ -112,6 +112,8 @@ class UpdateGameScore implements Runnable {
                     gateway.pushMessage(new ProgressMessage(gameState.getScore()));
                     }
                     gateway.refresh();
+                    if(gateway.isGameOver()) 
+                        pane.close();
                 }
                 else
                     break;

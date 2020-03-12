@@ -14,5 +14,7 @@ public interface NetworkConsts {
     public static final int GET_PROGRESS = 1;
     public static final int UPDATED_PROGRESS = 2;
     public static final int START = 3;
+    public static final int WINNER = 4;
+    public static final int LOSER = 5;
 
 }
